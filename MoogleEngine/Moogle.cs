@@ -2,28 +2,18 @@
 
 public static class Moogle
 {
-    //Campos usados
-    public static string[] files = GetFiles(true);
-    public static string[] files_raw = GetFiles();
-    private static string g_query = "";
     public static SearchResult Query(string query)
     {
-        g_query = query;
-        TestEmpty();
-        return new SearchResult(SetItems(SortItems()),query);
+        SearchQuery search_query = new SearchQuery(GetFiles(),query);
+        TestEmpty(search_query);
+        if(query != "" && query != null && query != " " )
+            return new SearchResult(SetItems(SortItems(search_query)),query.ToLower());
+        return new SearchResult(new SearchItem[1]{new SearchItem("Por favor escriba algo","...",0.0f)},"");    
     }
-    private static string[] GetFiles(bool name_only = false)
+    private static string[] GetFiles()
     {
         //Propiedad para obtener el nombre de los archivos
         string[] files=Directory.GetFiles(Directory.GetCurrentDirectory() + @"/Files",".",SearchOption.AllDirectories);
-        if(name_only)
-        {
-            for (int i = 0; i < files.Length; i++)
-            {
-                files[i]=Path.GetFileName(files[i]);
-            }
-            return files;
-        }
         return files; 
     }
     public static SearchItem[] SetItems(string[] compared)
@@ -63,26 +53,40 @@ public static class Moogle
         return new SearchItem[1]{new SearchItem("No se encontro ninguna coincidencia" , "" ,rand.NextSingle())};    
     }
 
-    private static string[] SortItems()
+    private static string[] SortItems(SearchQuery search_query)
     {
-        string[] compared = new string[files.Length];
-        float[] f_count = new float[files.Length];
+        //Variables necesarias
+        string[] files_raw=search_query.FilesRaw;
+        string[] files = search_query.Files;
+        string query = search_query.Query;
         int c_count=0;
-        //Guardamos el score de cada coincidencia
-        for (int i = 0; i < files.Length; i++)
+
+        //Leemos los ficheros y los guardamos en un array de FileContent
+        FileContent[] file_content = new FileContent[files.Length];
+
+        for (int i = 0; i < file_content.Length; i++)
         {
-            f_count[i]=S_Bunch(S_Reader(files_raw[i]).Split(" "),g_query);
+            file_content[i] = new FileContent(files[i],S_Reader(files_raw[i]));
+        }
+        file_content = S_Operator(file_content , query);
+        file_content = Clean_File(file_content);
+        //Guardamos el score de cada coincidencia
+        float[] f_count = new float[file_content.Length];
+        for (int i = 0; i < f_count.Length; i++)
+        {
+            f_count[i]=S_Bunch(file_content[i].Content.Split(' '),query);
         }
         //Lo ordenamos
         Array.Sort(f_count);
         //Ahora lo hacemos coincidir con su respectivo archivo
+        string[] compared = new string[file_content.Length];
         for (int i = 0; i < compared.Length; i++)
         {
             for (int j = 0; j < compared.Length; j++)
             {
-                if((S_Bunch(S_Reader(files_raw[j]).Split(" "),g_query)==f_count[i] && !S_In(compared,files[j])) && S_Bunch(S_Reader(files_raw[j]).Split(" "),g_query) !=0)
+                if((S_Bunch(file_content[j].Content.Split(" "),query)==f_count[i] && !S_In(compared,file_content[j].FileName)) && S_Bunch(file_content[j].Content.Split(" "),query) !=0)
                 {
-                    compared[c_count]=files[j];
+                    compared[c_count]=file_content[j].FileName;
                 }
             }
             c_count++;
@@ -95,6 +99,62 @@ public static class Moogle
 
     }
     
+    public static FileContent[] S_Operator(FileContent[] file_content , string query)
+    {
+        // Operadores:
+        // - ! No debe estar la paralabra en ningun documento
+        // - ^ Tiene que aparecer la palabra
+        // - ~ Esas palabras que esten entre el operador mientras mas cerca aparezcan mas alto es el score
+        // - * Le da mas importancia a la palabra y es acumulativo
+
+        int lenght=file_content.Length;
+
+        for (int i = 0; i < file_content.Length; i++)
+        {
+            string[] temp_words =file_content[i].Content.Split(" ");
+            string[] temp_query =query.Split(" ");
+
+            for (int j = 0; j < temp_query.Length; j++)
+            {
+                if(temp_query[j] != "" && temp_query[j] != " ")
+                    if(temp_query[j][0] == '!')
+                    {
+                        for (int k = 0; k < temp_words.Length; k++)
+                        {
+                            if(temp_words[k]==temp_query[j].Split('!')[1])
+                            {
+                                file_content[i]=new FileContent("","");
+                            }
+                        }
+                    }
+                
+            }   
+            
+        }
+        return file_content ;
+
+    }
+    public static FileContent[] Clean_File(FileContent[] file_content)
+    {
+        int count=0;
+        for (int i = 0; i < file_content.Length; i++)
+        {
+            if(file_content[i].FileName!="" && file_content[i].FileName != null)
+            {
+                count++;
+            }           
+        }
+        FileContent[] file_content_new= new FileContent[count];
+        count=0;
+        for (int i = 0; i < file_content.Length; i++)
+        {
+            if(file_content[i].FileName!="" && file_content[i].FileName != null)
+            {
+                file_content_new[count++]=file_content[i];
+            }
+        }
+        return file_content_new;
+    }
     #region S-string
     public static string S_Reader(string file)
     {
@@ -157,8 +217,9 @@ public static class Moogle
     #endregion
 
     #region Tests
-    public static bool TestEmpty()
+    public static bool TestEmpty(SearchQuery search_query)
     {
+        string [] files = search_query.Files;
         if(files[0] == null || files[0] == "")
         {
             throw new Exception("El array de archivos esta vacio");
