@@ -7,13 +7,13 @@ public static class Moogle
         SearchQuery search_query = new SearchQuery(GetFiles(),query);
         TestEmpty(search_query);
         if(query != "" && query != null && query != " " )
-            return new SearchResult(SetItems(SortItems(search_query)),query.ToLower());
+            return new SearchResult(SetItems(SortItems(search_query)),Split_Query(query).ToLower());
         return new SearchResult(new SearchItem[1]{new SearchItem("Por favor escriba algo","...",0.0f)},"");    
     }
     private static string[] GetFiles()
     {
         //Propiedad para obtener el nombre de los archivos
-        string[] files=Directory.GetFiles(Directory.GetCurrentDirectory() + @"/Files",".",SearchOption.AllDirectories);
+        string[] files=Directory.GetFiles(Directory.GetCurrentDirectory() + @"/Content",".",SearchOption.AllDirectories);
         return files; 
     }
     public static SearchItem[] SetItems(string[] compared)
@@ -40,7 +40,7 @@ public static class Moogle
         {
             if(compared[i] !="" && compared[i] !=null)
             {
-                items[i] = new SearchItem(compared[i],S_Reader(Directory.GetCurrentDirectory()+@"/Files/"+compared[i]).Substring(0,200),rand.NextSingle());
+                items[i] = new SearchItem(compared[i],S_Reader(Directory.GetCurrentDirectory()+@"/Content/"+compared[i]).Substring(0,200),rand.NextSingle());
                 empty=false;
             }
             
@@ -58,7 +58,9 @@ public static class Moogle
         //Variables necesarias
         string[] files_raw=search_query.FilesRaw;
         string[] files = search_query.Files;
-        string query = search_query.Query;
+        //Formateamos la query de operadores y signos de puntuacion
+        string query = Split_Query(search_query.Query);
+        System.Console.WriteLine(query);
         int c_count=0;
 
         //Leemos los ficheros y los guardamos en un array de FileContent
@@ -68,13 +70,13 @@ public static class Moogle
         {
             file_content[i] = new FileContent(files[i],S_Reader(files_raw[i]));
         }
-        file_content = S_Operator(file_content , query);
+        file_content = S_Operator(file_content , search_query.Query);
         file_content = Clean_File(file_content);
         //Guardamos el score de cada coincidencia
         float[] f_count = new float[file_content.Length];
         for (int i = 0; i < f_count.Length; i++)
         {
-            f_count[i]=S_Bunch(file_content[i].Content.Split(' '),query);
+            f_count[i]=S_Bunch(file_content[i].Content.Split(' '),query)+file_content[i].Initial_Score;
         }
         //Lo ordenamos
         Array.Sort(f_count);
@@ -84,7 +86,10 @@ public static class Moogle
         {
             for (int j = 0; j < compared.Length; j++)
             {
-                if((S_Bunch(file_content[j].Content.Split(" "),query)==f_count[i] && !S_In(compared,file_content[j].FileName)) && S_Bunch(file_content[j].Content.Split(" "),query) !=0)
+                float score_base = f_count[i]+file_content[i].Initial_Score;
+                float score_match = S_Bunch(file_content[j].Content.Split(" "),query)+file_content[j].Initial_Score;
+                //System.Console.WriteLine("//"+score_base+"//"+score_match);
+                if((score_match==score_base) && (!S_In(compared,file_content[j].FileName)) && score_match !=0)
                 {
                     compared[c_count]=file_content[j].FileName;
                 }
@@ -99,6 +104,38 @@ public static class Moogle
 
     }
     
+    public static string Split_Query(string s_query)
+    {
+        
+        string[] temp_query =s_query.Split(" ");
+        string query="";
+        for (int j = 0; j < temp_query.Length; j++)
+        {
+            bool space=false;
+            if(temp_query[j] != "" && temp_query[j] != " ")
+            {
+                for (int k = 0; k < temp_query[j].Length; k++)
+                {
+    
+                if(temp_query[j][k] == '!' || temp_query[j][k] == '^' || temp_query[j][k] == '~' || temp_query[j][k] == ',' || temp_query[j][k] == '.' || temp_query[j][k] == '?' || temp_query[j][k] == '*')
+                {
+                    continue;
+                }
+                else
+                {
+                    query+=temp_query[j][k];
+                    space=true;
+                }
+                }
+                
+            }
+            if(space)
+            {
+                query+=" ";
+            }    
+        }
+        return query;
+    }
     public static FileContent[] S_Operator(FileContent[] file_content , string query)
     {
         // Operadores:
@@ -127,7 +164,73 @@ public static class Moogle
                             }
                         }
                     }
-                
+                    
+                    else if(temp_query[j][0] == '^')
+                    {
+                        bool exist=false;
+                        for (int k = 0; k < temp_words.Length; k++)
+                        {
+                            if(temp_words[k]==temp_query[j].Split('^')[1])
+                            {
+                                exist=true;
+                            }
+                        }
+                        if(!exist)
+                        {
+                        file_content[i]=new FileContent("","");    
+                        }
+                    }
+                      
+                    else if(temp_query[j][0] == '~')
+                    {
+                    bool one=false;
+                    bool two=false;
+                        for (int l = 0; l < temp_words.Length; l++)
+                        {
+                            if(temp_words[l]==temp_query[j-1])
+                                one=true;
+                            if(temp_words[l]==temp_query[j+1])
+                                two=true;
+                        }
+                            if(one&&two){
+                                float temp_score=0.0f;
+                                int count=0;
+                                for (int k = 0; k < temp_words.Length; k++)
+                                {
+                                    //formula dividir entre la cantidad de letras
+                                    if(temp_words[k]==temp_query[j-1])
+                                    {
+                                        count++;
+                                    }
+                                    if(temp_words[k]==temp_query[j+1])
+                                        break;
+                                    
+                                }
+                                temp_score=((float)count/(float)temp_words.Length)*10f;
+                                if(temp_score <= 0f)
+                                    file_content[i] = new FileContent("","");
+                                file_content[i].Initial_Score=temp_score;
+                            }    
+                    }
+                    else if(temp_query[j][0] == '*')
+                    {
+                        for (int k = 0; k < temp_query[j].Length; k++)
+                        {
+                            if(temp_query[j][k]=='*')
+                                for (int l = 0; l < temp_words.Length; l++)
+                                {
+                                    if(temp_query[j].Split('*')[1]==temp_words[l])
+                                    {
+                                        file_content[i].Initial_Score+=0.2f;
+                                        System.Console.WriteLine(temp_query[j].Split('*')[1]);
+                                    }
+
+                                }
+
+                        }
+                        System.Console.WriteLine(file_content[i].Initial_Score);
+                    }
+        
             }   
             
         }
