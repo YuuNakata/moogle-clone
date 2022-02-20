@@ -9,7 +9,12 @@ public static class Moogle
         SearchQuery search_query = new SearchQuery(GetFiles(),query);
         TestEmpty(search_query);
         if(query != "" && query != null && query != " " )
-            return new SearchResult(SetItems(SortItems(search_query)),Split_Query(query).ToLower());
+        {
+            (string[] compared , FileContent[] file_content) = SortItems(search_query);
+            
+            return SetItems(compared,file_content,query);
+
+        }
         return new SearchResult(new SearchItem[1]{new SearchItem("Por favor escriba algo","...",0.0f)},"");    
     }
     private static string[] GetFiles()
@@ -18,8 +23,9 @@ public static class Moogle
         string[] files=Directory.GetFiles(Directory.GetCurrentDirectory() + @"/Content",".",SearchOption.AllDirectories);
         return files; 
     }
-    public static SearchItem[] SetItems(string[] compared)
+    public static SearchResult SetItems(string[] compared , FileContent[] file_content,string query)
     {
+        System.Console.WriteLine(TestSuggestion(query,file_content));
         //Provicional debido a que el score en el SearchItem no sirve de mucho :)
         Random rand = new Random();
         //Las variables uzadas
@@ -50,13 +56,13 @@ public static class Moogle
         }
         //Si no es vacio se regresan los items obtenidos
         if(!empty)
-            return items;
+            return new SearchResult(items,TestSuggestion(query,file_content));
         empty=true;       
         //De lo contrario se informa
-        return new SearchItem[1]{new SearchItem("No se encontro ninguna coincidencia" , "" ,rand.NextSingle())};    
+        return new SearchResult(new SearchItem[1]{new SearchItem("No se encontro ninguna coincidencia" , "" ,rand.NextSingle())},TestSuggestion(query,file_content));    
     }
 
-    private static string[] SortItems(SearchQuery search_query)
+    private static (string[] compared,FileContent[] file_content) SortItems(SearchQuery search_query)
     {
         //Variables necesarias
         string[] files_raw=search_query.FilesRaw;
@@ -128,7 +134,7 @@ public static class Moogle
 
 
         //Regresamos el array ya ordenado con las coincidencias
-        return compared;
+        return (compared,file_content.Where((source, index) =>index != file_content.Length-1).ToArray());
 
     }
     
@@ -471,6 +477,44 @@ public static class Moogle
     #endregion
 
     #region Tests
+    public static int LevenshteinDistance(string s, string t)
+    {
+        int n = s.Length;
+        int m = t.Length;
+        int[,] d = new int[n + 1, m + 1];
+        // Step 1
+        if (n == 0)
+        {
+            return m;
+        }
+        if (m == 0)
+        {
+            return n;
+        }
+        // Step 2
+        for (int i = 0; i <= n; d[i, 0] = i++)
+        {
+        }
+        for (int j = 0; j <= m; d[0, j] = j++)
+        {
+        }
+        // Step 3
+        for (int i = 1; i <= n; i++)
+        {
+            //Step 4
+            for (int j = 1; j <= m; j++)
+            {
+                // Step 5
+                int cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
+                // Step 6
+                d[i, j] = Math.Min(
+                    Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
+                    d[i - 1, j - 1] + cost);
+            }
+        }
+        // Step 7
+        return d[n, m];
+    }
     public static bool TestEmpty(SearchQuery search_query)
     {
         string [] files = search_query.Files;
@@ -480,7 +524,48 @@ public static class Moogle
         }
         return true;
     }
-    #endregion
+        public static string TestSuggestion(string query,FileContent[] file_content)
+        {
+            string[] s_query=query.Split(" ");
+            bool[] b_query = new bool[s_query.Length];
+            string result="";
+            for (int i = 0; i < s_query.Length; i++)
+            {
+                for (int j = 0; j < file_content.Length; j++)
+                {
+                    if(file_content[j].Content.Contains(" "+s_query[i]+" "))
+                        b_query[i]=true;
+                }
+            }
+            int global_cost = int.MaxValue;
+            for (int i = 0; i < b_query.Length; i++)
+            {
+                if(!b_query[i])
+                {
+                    string last_word=s_query[i];
+                    for (int j = 0; j < file_content.Length; j++)
+                    {
+                       string[] temp_content = file_content[j].Content.Split(" ");
+                       for (int k = 0; k < temp_content.Length; k++)
+                       {
+                           int temp_cost=LevenshteinDistance(s_query[i],temp_content[k]);
+                           if(temp_cost<global_cost && temp_cost<=3)
+                           {
+                                global_cost=temp_cost;
+                                query=query.Replace(last_word,temp_content[k]);
+                                System.Console.WriteLine(query);
+                                last_word=temp_content[k];
+                           }
+                       }
+                    }
+                    result=query;
 
+
+                }
+
+            }
+            return query;
+        }
+    #endregion
 
 }
