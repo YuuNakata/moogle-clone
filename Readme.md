@@ -1,14 +1,14 @@
-# Moogle!
+## Moogle!
 
 ![](moogle.png)
 
 > Proyecto de Programación I. Facultad de Matemática y Computación. Universidad de La Habana. Curso 2021.
 
--Raydel E. Reuco García C113
+>Raydel E. Reuco García C113
 
 En este proyecto he implementado algunos de los objetivos propuestos,agregando nuevas clases y elementos para poder llegar al resultado esperado. 
 
-> Funcionalidades implementadas en el proyecto:
+# Funcionalidades implementadas en el proyecto:
 
 -Agregada una clase para guardar y ordenar la query junto con la dirección de los documentos sobre los cuales se realizará la busqueda(SearchQuery).
 -Mediante otra clase FileContent se guarda el nombre del archivo con su contenido ya formateado junto a los operadores(!,^,~,*) y ejecutar sus propósitos sobre la clase de archivos antes mencionada,afectando si el documento tiene o no que estar , tanco como su score a tener en cuenta a la hora de ordenar.
