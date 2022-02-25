@@ -7,9 +7,7 @@ public static class Moogle
 {
     public static SearchResult Query(string query)
     {
-        System.Console.WriteLine("Query");
         SearchQuery search_query = new SearchQuery(GetFiles(),query);
-        TestEmpty(search_query);
         if(query != "" && query != null && query != " " )
         {
             (string[] compared , FileContent[] file_content) = SortItems(search_query);
@@ -21,15 +19,13 @@ public static class Moogle
     }
     private static string[] GetFiles()
     {
-        System.Console.WriteLine("GetFiles");
         //Propiedad para obtener el nombre de los archivos
         string[] files=Directory.GetFiles(Directory.GetCurrentDirectory() + @"/Content",".",SearchOption.AllDirectories);
         return files; 
     }
     public static SearchResult SetItems(string[] compared , FileContent[] file_content,string query)
     {
-        System.Console.WriteLine("SetItems");
-        System.Console.WriteLine(TestSuggestion(query,file_content));
+
         //Provicional debido a que el score en el SearchItem no sirve de mucho :)
         Random rand = new Random();
         //Las variables uzadas
@@ -53,7 +49,26 @@ public static class Moogle
             if(compared[i] !="" && compared[i] !=null)
             {
                 string snippet = S_Reader(Directory.GetCurrentDirectory()+@"/Content/"+compared[i]);
-                items[i] = new SearchItem(compared[i],snippet.Substring(0,(int)((float)snippet.Length*0.3f)),rand.NextSingle());
+                string[] s_query = query.Split(" ");
+                string final_snippet="";
+                for (int j = 0; j < s_query.Length; j++)
+                {
+                    if(snippet.Contains(s_query[j]))
+                    {
+                        int start_index = snippet.IndexOf(s_query[j]);
+                        start_index -= (int)0.01f*snippet.Length;
+                        int final_index = snippet.LastIndexOf(s_query[j]);
+                        final_index += (int)0.01f*snippet.Length;
+                        final_index-=start_index;
+
+                        if(start_index<0)
+                            start_index=0;
+                        if(final_index>snippet.Length)
+                            final_index=snippet.Length;    
+                        final_snippet+=$"{snippet.Substring(start_index,final_index)} ";
+                    }
+                }
+                items[i] = new SearchItem(compared[i],final_snippet,rand.NextSingle());
                 empty=false;
             }
             
@@ -68,7 +83,6 @@ public static class Moogle
 
     private static (string[] compared,FileContent[] file_content) SortItems(SearchQuery search_query)
     {
-        System.Console.WriteLine("SortItems");
         //Variables necesarias
         string[] files_raw=search_query.FilesRaw;
         string[] files = search_query.Files;
@@ -102,7 +116,7 @@ public static class Moogle
         //     {
         //         float score_base = f_count[i]+file_content[i].Initial_Score;
         //         float score_match = S_Bunch(file_content,file_content[j],query)+file_content[j].Initial_Score;
-        //         //System.Console.WriteLine("//"+score_base+"//"+score_match);
+        //         //("//"+score_base+"//"+score_match);
         //         if((score_match==score_base) && (!S_In(compared,file_content[j].FileName)) && score_match !=0)
         //         {
         //             compared[c_count]=file_content[j].FileName;
@@ -118,7 +132,6 @@ public static class Moogle
         {
             if(ds[i]?.Score !=null){  
                 f_count[i] = ds[i].Score;
-                System.Console.WriteLine($"{ds[i].Score}-{ds[i].FileName}");
             }
         }
 
@@ -137,13 +150,12 @@ public static class Moogle
 
 
         //Regresamos el array ya ordenado con las coincidencias
-        return (compared,file_content.Where((source, index) =>index != file_content.Length-1).ToArray());
+        return (compared,file_content);
 
     }
     
     public static string Split_Query(string s_query)
     {
-        System.Console.WriteLine("SplitQuery");
         string[] temp_query =s_query.Split(" ");
         string query="";
         for (int j = 0; j < temp_query.Length; j++)
@@ -175,7 +187,6 @@ public static class Moogle
     }
     public static FileContent[] S_Operator(FileContent[] file_content , string query)
     {
-        System.Console.WriteLine("S_Operator");
         // Operadores:
         // - ! No debe estar la paralabra en ningun documento
         // - ^ Tiene que aparecer la palabra
@@ -268,12 +279,11 @@ public static class Moogle
             }   
             
         }
-        return file_content ;
+        return file_content;
 
     }
     public static FileContent[] Clean_File(FileContent[] file_content)
     {
-        System.Console.WriteLine("Clean File1");
         int count=0;
         for (int i = 0; i < file_content.Length; i++)
         {
@@ -295,7 +305,6 @@ public static class Moogle
     }
     public static DocumentScore[] Clean_File(DocumentScore[] file_content)
     {
-        System.Console.WriteLine("Clean File2");
         int count=0;
         for (int i = 0; i < file_content.Length; i++)
         {
@@ -318,7 +327,6 @@ public static class Moogle
     #region S-string
     public static string S_Reader(string file)
     {
-        System.Console.WriteLine("S_Reader");
         string content="";
         StreamReader reader = new StreamReader(file);
         while(!reader.EndOfStream)
@@ -331,7 +339,6 @@ public static class Moogle
 
     public static float TF(FileContent doc , string word)
     {
-        System.Console.WriteLine("TF");
         float result=0.0f;
         string[] doc_words = doc.Content.Split(" ");
         for (int i = 0; i < doc_words.Length ; i++)
@@ -346,7 +353,6 @@ public static class Moogle
     }
     public static float IDF(FileContent[] doc , string word)
     {
-        System.Console.WriteLine("IDF");
         int is_in_doc=0;
         for (int i = 0; i < doc.Length; i++)
         {
@@ -362,7 +368,6 @@ public static class Moogle
 
     public static bool S_In(string[] s1 , string s2)
     {
-        System.Console.WriteLine("S_IN");
         for (int i = 0; i < s1.Length; i++)
         {
             if(s1[i]==s2)
@@ -389,7 +394,6 @@ public static class Moogle
     // }
     public static DocumentScore[] Vectorizar(FileContent[] docs ,string query)
     {
-        System.Console.WriteLine("Vectorizar");
         int word_length=0;
         for (int i = 0; i < docs.Length; i++)
         {
@@ -433,7 +437,6 @@ public static class Moogle
     }
     public static DocumentScore[] Scorize(Vector[] vectores,FileContent[] files , Vector[] query)
     {
-        System.Console.WriteLine("Scorize");
         DocumentScore[] ds = new DocumentScore[vectores.Length];
         int count=-1;
         for (int i = 0; i < vectores[1].Values.Length; i++)
@@ -465,7 +468,6 @@ public static class Moogle
 
             if(!Single.IsNaN(result))
             {
-            System.Console.WriteLine(result);
             ds[++count]=new DocumentScore(files[i].FileName.ToString(),result);
             }
             
@@ -485,7 +487,6 @@ public static class Moogle
     
     public static float S_Bunch(FileContent[] all_doc , FileContent doc, string query)
     {
-        System.Console.WriteLine("S_Bunch");
         float result = 0f;
         string[] temp_words = doc.Content.Split(" ");
         string[] word_s = query.Split(" ");
@@ -538,19 +539,8 @@ public static class Moogle
         // Step 7
         return d[n, m];
     }
-    public static bool TestEmpty(SearchQuery search_query)
-    {
-        System.Console.WriteLine("TestEmpty");
-        string [] files = search_query.Files;
-        if(files[0] == null || files[0] == "")
-        {
-            throw new Exception("El array de archivos esta vacio");
-        }
-        return true;
-    }
         public static string TestSuggestion(string query,FileContent[] file_content)
         {
-            System.Console.WriteLine("TestSuggestion");
             string[] s_query=query.Split(" ");
             bool[] b_query = new bool[s_query.Length];
             string result="";
@@ -578,7 +568,6 @@ public static class Moogle
                            {
                                 global_cost=temp_cost;
                                 query=query.Replace(last_word,temp_content[k]);
-                                System.Console.WriteLine(query);
                                 last_word=temp_content[k];
                            }
                        }
