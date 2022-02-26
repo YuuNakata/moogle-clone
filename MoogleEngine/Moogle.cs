@@ -50,22 +50,16 @@ public static class Moogle
             {
                 string snippet = S_Reader("../Content/"+compared[i]);
                 string[] s_query = query.Split(" ");
+                string[] s_snippet = query.Split("\n");
                 string final_snippet="";
                 for (int j = 0; j < s_query.Length; j++)
                 {
-                    if(snippet.Contains(s_query[j]))
+                    for (int k = 0; k < s_snippet.Length; k++)
                     {
-                        int start_index = snippet.IndexOf(s_query[j]);
-                        start_index -= (int)0.01f*snippet.Length;
-                        int final_index = snippet.LastIndexOf(s_query[j]);
-                        final_index += (int)0.01f*snippet.Length;
-                        final_index-=start_index;
-
-                        if(start_index<0)
-                            start_index=0;
-                        if(final_index>snippet.Length)
-                            final_index=snippet.Length;    
-                        final_snippet+=$"{snippet.Substring(start_index,final_index)} ";
+                        if(s_snippet[k].Contains(s_query[j]))
+                        {
+                            final_snippet+=s_snippet[k]+"\n";
+                        }
                     }
                 }
                 items[i] = new SearchItem(compared[i],final_snippet,rand.NextSingle());
@@ -342,7 +336,7 @@ public static class Moogle
                     is_in_doc++;
             }
         }
-        return (float)Math.Log10((float)doc.Length/(float)1+(float)is_in_doc);
+        return (float)Math.Log((float)doc.Length/(float)1+(float)is_in_doc);
     }
 
     public static bool S_In(string[] s1 , string s2)
