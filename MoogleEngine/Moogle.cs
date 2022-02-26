@@ -49,24 +49,33 @@ public static class Moogle
             if(compared[i] !="" && compared[i] !=null)
             {
                 string snippet = S_Reader("../Content/"+compared[i]);
-                string[] s_query = query.Split(" ");
-                string[] s_snippet = query.Split("\n");
-                string final_snippet="";
+                string[] s_query = query.ToLower().Split(" ");
+                string[] s_snippet = snippet.ToLower().Split("\n");
+                string final_snippet=string.Empty;
                 for (int j = 0; j < s_query.Length; j++)
                 {
-                    for (int k = 0; k < s_snippet.Length; k++)
+                    for (int k = 0; k < (int)(s_snippet.Length*0.1f); k++)
                     {
-                        if(s_snippet[k].Contains(s_query[j]))
+                        int random = rand.Next(0,s_snippet.Length);
+                        if(s_snippet[random].Contains(" "+s_query[j]+" "))
                         {
-                            final_snippet+=s_snippet[k]+"\n";
+                            final_snippet+="..."+s_snippet[random]+"..."+"\n";
                         }
                     }
                 }
-                items[i] = new SearchItem(compared[i],final_snippet,rand.NextSingle());
-                empty=false;
+                if(final_snippet!=string.Empty)
+                {
+                    items[i] = new SearchItem(compared[i],final_snippet,rand.NextSingle());
+                    empty=false;
+                }
+                else
+                {
+                    items[i] = new SearchItem("Deleted","",0.0f);
+                }
             }
             
         }
+        items=items.Where(element => element.Title != "Deleted").ToArray();
         //Si no es vacio se regresan los items obtenidos
         if(!empty)
             return new SearchResult(items,TestSuggestion(query,file_content));
@@ -168,7 +177,7 @@ public static class Moogle
 
         for (int i = 0; i < file_content.Length; i++)
         {
-            string[] temp_words =file_content[i].Content.Split(" ");
+            string[] temp_words =file_content[i].Content;
             string[] temp_query =query.Split(" ");
 
             for (int j = 0; j < temp_query.Length; j++)
@@ -313,7 +322,7 @@ public static class Moogle
     public static float TF(FileContent doc , string word)
     {
         float result=0.0f;
-        string[] doc_words = doc.Content.Split(" ");
+        string[] doc_words = doc.Content;
         for (int i = 0; i < doc_words.Length ; i++)
         {
             if(word==doc_words[i])
@@ -329,7 +338,7 @@ public static class Moogle
         int is_in_doc=0;
         for (int i = 0; i < doc.Length; i++)
         {
-            string[] temp_content=doc[i].Content.Split(" ");
+            string[] temp_content=doc[i].Content;
             for (int j = 0; j < temp_content.Length ; j++)
             {
                 if(temp_content[j] ==word)
@@ -354,14 +363,14 @@ public static class Moogle
         int word_length=0;
         for (int i = 0; i < docs.Length; i++)
         {
-            word_length+=docs[i].Content.Split(' ').Length;
+            word_length+=docs[i].Content.Length;
         }
         //Guardar las palabras en un array
         string[] words = new string[word_length];
         int count=0;
         for (int i = 0; i < docs.Length; i++)
         {
-            string[] temp_content = docs[i].Content.Split(" ");
+            string[] temp_content = docs[i].Content;
             for (int j = 0; j < temp_content.Length; j++)
             {
                 if(temp_content[j]!="la" || temp_content[j]!="de" || temp_content[j]!="del")
@@ -369,6 +378,7 @@ public static class Moogle
             }
         }
         //Indexado los TF-IDF como vectores --(implementacion en cambios de mejora)
+        
         Vector[] vectores = new Vector[word_length];
         for (int i = 0; i < word_length; i++)
         {
@@ -386,6 +396,7 @@ public static class Moogle
             float[] v_float=new float[docs.Length];
             for (int j = 0; j < docs.Length; j++)
             {
+                System.Console.WriteLine("TF-IDF en proceso...");
                 v_float[j]=TF(docs[j],s_query[i])*IDF(docs,s_query[i]);
             }
             v_query[i]=new Vector(v_float,s_query[i]);
@@ -430,14 +441,6 @@ public static class Moogle
             }
             
         }
-        for (int i = 0; i < query.Length; i++)
-        {
-            System.Console.Write(query[i].Word+"-");
-            for (int j = 0; j < query[i].Values.Length; j++)
-            {
-                System.Console.Write($"{query[i].Values[j]} |");
-            }
-        }
             
 
         return ds;
@@ -446,6 +449,7 @@ public static class Moogle
     #endregion
 
     #region Tests
+
     public static int LevenshteinDistance(string s, string t)
     {
         int n = s.Length;
@@ -505,7 +509,7 @@ public static class Moogle
                     string last_word=s_query[i];
                     for (int j = 0; j < file_content.Length; j++)
                     {
-                       string[] temp_content = file_content[j].Content.Split(" ");
+                       string[] temp_content = file_content[j].Content;
                        for (int k = 0; k < temp_content.Length; k++)
                        {
                            int temp_cost=LevenshteinDistance(s_query[i],temp_content[k]);

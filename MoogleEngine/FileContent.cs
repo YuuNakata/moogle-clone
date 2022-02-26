@@ -6,11 +6,11 @@ public class FileContent
     public FileContent(string file_name , string content , float ini_score = 0.0f)
     {
         this.FileName=file_name;
-        this.Content=content;
+        this.Content=content.Split(" ");
         this.Initial_Score=ini_score;
         
     }
     public string FileName{get ; private set;}
-    public string Content{get ; private set;}
+    public string[] Content{get ; private set;}
     public float Initial_Score{get => init_score ; set{init_score=value;} }
 }
