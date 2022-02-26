@@ -17,3 +17,7 @@ En este proyecto he implementado algunos de los objetivos propuestos,agregando n
 -Despúes se guardan todos estos valores en un array , se ordena y luego se iguala con cada uno de los valores para devolverlos en otro array ya ordenados.
 -También esta la sugerencia la cual si hay una palabra de query que no esta en el documento se usa el algoritmo de Levenshtein Distance para calcular las palabras mas próximas en los documentos y devolvérsela al usuario.
 -Por último se analiza en los documentos devueltos la ubicacion de las palabras del query y se añaden al snippet dando una breve informacion del contenido de los mismos.
+
+
+**Bibliografía empleada**
+-Información de wikipedia y varios sitios web.
