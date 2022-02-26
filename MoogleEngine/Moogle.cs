@@ -20,7 +20,7 @@ public static class Moogle
     private static string[] GetFiles()
     {
         //Propiedad para obtener el nombre de los archivos
-        string[] files=Directory.GetFiles(Directory.GetCurrentDirectory() + @"/Content",".",SearchOption.AllDirectories);
+        string[] files=Directory.GetFiles("../Content",".",SearchOption.AllDirectories);
         return files; 
     }
     public static SearchResult SetItems(string[] compared , FileContent[] file_content,string query)
@@ -88,7 +88,6 @@ public static class Moogle
         string[] files = search_query.Files;
         //Formateamos la query de operadores y signos de puntuacion
         string query = Split_Query(search_query.Query);
-        //int c_count=0;
 
         //Leemos los ficheros y los guardamos en un array de FileContent
         FileContent[] file_content = new FileContent[files.Length];
@@ -101,31 +100,9 @@ public static class Moogle
         file_content = Clean_File(file_content);
         DocumentScore[] ds = Vectorizar(file_content,query);
         //Guardamos el score de cada coincidencia
-        // float[] f_count = new float[file_content.Length];
-        // for (int i = 0; i < f_count.Length; i++)
-        // {
-        //     f_count[i]=S_Bunch(file_content,file_content[i],query)+file_content[i].Initial_Score;
-        // }
-        // //Lo ordenamos
-        // Array.Sort(f_count);
-        // //Ahora lo hacemos coincidir con su respectivo archivo
+
+        //Ahora lo hacemos coincidir con su respectivo archivo
         string[] compared = new string[ds.Length];
-        // for (int i = 0; i < compared.Length; i++)
-        // {
-        //     for (int j = 0; j < compared.Length; j++)
-        //     {
-        //         float score_base = f_count[i]+file_content[i].Initial_Score;
-        //         float score_match = S_Bunch(file_content,file_content[j],query)+file_content[j].Initial_Score;
-        //         //("//"+score_base+"//"+score_match);
-        //         if((score_match==score_base) && (!S_In(compared,file_content[j].FileName)) && score_match !=0)
-        //         {
-        //             compared[c_count]=file_content[j].FileName;
-        //         }
-        //     }
-        //     c_count++;
-        // }
-        // //Lo invertimos debido a que se ordeno de menor a mayor
-        // Array.Reverse(compared);
 
         float[] f_count = new float[ds.Length];
         for (int i = 0; i < ds.Length; i++)
@@ -329,11 +306,13 @@ public static class Moogle
     {
         string content="";
         StreamReader reader = new StreamReader(file);
+        
         while(!reader.EndOfStream)
         {
             content += "\n" + reader.ReadLine(); 
         }
         reader.Close();
+        
         return content;
     }
 
@@ -363,7 +342,7 @@ public static class Moogle
                     is_in_doc++;
             }
         }
-        return (float)Math.Log((float)doc.Length/(float)1+(float)is_in_doc);
+        return (float)Math.Log10((float)doc.Length/(float)1+(float)is_in_doc);
     }
 
     public static bool S_In(string[] s1 , string s2)
@@ -375,23 +354,7 @@ public static class Moogle
         }
         return false;
     }
-    // public static float S_Contain(string[] s1 , string s2)
-    // {
-    //     float lost = 0.0f;
-    //     string[] s2_a = s2.Split(" ");
 
-    //     for (int i = 0; i < s1.Length; i++)
-    //     {
-    //         for (int j = 0; j < s2_a.Length; j++)
-    //         {
-    //             if(s1[i]==s2_a[j])
-    //             {
-    //                 lost += 0.05f;
-    //             }
-    //         }
-    //     }
-    //     return lost;
-    // }
     public static DocumentScore[] Vectorizar(FileContent[] docs ,string query)
     {
         int word_length=0;
@@ -411,6 +374,7 @@ public static class Moogle
                     words[count++]=temp_content[j].ToLower();
             }
         }
+        //Indexado los TF-IDF como vectores --(implementacion en cambios de mejora)
         Vector[] vectores = new Vector[word_length];
         for (int i = 0; i < word_length; i++)
         {
@@ -485,19 +449,6 @@ public static class Moogle
         return ds;
     }
     
-    public static float S_Bunch(FileContent[] all_doc , FileContent doc, string query)
-    {
-        float result = 0f;
-        string[] temp_words = doc.Content.Split(" ");
-        string[] word_s = query.Split(" ");
-        for (int i = 0; i < word_s.Length ; i++)
-        {
-            result+=TF(doc,word_s[i])*IDF(all_doc,word_s[i]);
-        }
-        return result;
-
-    }
-
     #endregion
 
     #region Tests
