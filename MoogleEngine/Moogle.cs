@@ -48,7 +48,7 @@ public static class Moogle
         {
             if(compared[i] !="" && compared[i] !=null)
             {
-                string snippet = S_Reader(Directory.GetCurrentDirectory()+@"/Content/"+compared[i]);
+                string snippet = S_Reader("../Content/"+compared[i]);
                 string[] s_query = query.Split(" ");
                 string final_snippet="";
                 for (int j = 0; j < s_query.Length; j++)
