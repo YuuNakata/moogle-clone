@@ -3,8 +3,7 @@
 ![](moogle.png)
 
 > Proyecto de Programación I. Facultad de Matemática y Computación. Universidad de La Habana. Curso 2021.
-
->Raydel E. Reuco García C113
+> Raydel E. Reuco García C113
 
 En este proyecto he implementado algunos de los objetivos propuestos,agregando nuevas clases y elementos para poder llegar al resultado esperado. 
 
@@ -27,7 +26,7 @@ operacion para el query y se crean vectores de esta misma forma para cada una de
 #### A continuación dejo una explicación de este algoritmo extraída de [Information retrieval document search using vector space model](https://www.datasciencecentral.com/information-retrieval-document-search-using-vector-space-model-in/)
 ##### Similarity Measures: cosine similarity
 
-    Mathematically, closeness between two vectors is calculated by calculating the cosine angle between two vectors. In similarlines, we can calculate cosine angle between each document vector and the query vector to find its closeness. To findrelevant document to the query term , we may calculate the similarity score between each document vector and the query termvector by applying cosine similarity . Finally, whichever documents having high similarity scores will be considered asrelevant documents to the query term.
+   > Mathematically, closeness between two vectors is calculated by calculating the cosine angle between two vectors. In similarlines, we can calculate cosine angle between each document vector and the query vector to find its closeness. To findrelevant document to the query term , we may calculate the similarity score between each document vector and the query termvector by applying cosine similarity . Finally, whichever documents having high similarity scores will be considered asrelevant documents to the query term.
     When we plot the term document matrix, each document vector represents a point in the vector space. In the below examplequery, Document 1 and Document 2 represent 3 points in the vector space. We can now compare the query with each of thedocument by calculating the cosine angle between them. 
 
 
@@ -39,10 +38,10 @@ devolvérsela al usuario.
 
 #### A continuación dejo una explicación de este algoritmo extraída de [The Levenshtein Algorithm](https://www.cuelogic.com/blog/the-levenshtein-algorithm)
 
-    Mathematically, the Levenshtein distance between two strings a, b (of length |a| and |b| respectively) is given by leva,b(a|,|b|) where:
+> Mathematically, the Levenshtein distance between two strings a, b (of length |a| and |b| respectively) is given by leva,b(a|,|b|) where:
 ![](Levenshtein.webp)
-        where 1(ai≠bi) is the indicator function equal to 0 when ai≠bi and equal to 1 otherwise, and leva, b(i,j) is the distancebetween the first i characters of a and the first j characters of b.
-        Note that the first element in the minimum corresponds to deletion (from a to b), the second to insertion and the third tomatch or mismatch, depending on whether the respective symbols are the same.
+> where 1(ai≠bi) is the indicator function equal to 0 when ai≠bi and equal to 1 otherwise, and leva, b(i,j) is thedistancebetween the first i characters of a and the first j characters of b.
+Note that the first element in the minimum corresponds to deletion (from a to b), the second to insertion and the thirdtomatch or mismatch, depending on whether the respective symbols are the same.
 
 - Por último se analiza en los documentos devueltos la ubicación de las palabras del query y se añaden al snippet dando una breve información del contenido de los mismos.
 
