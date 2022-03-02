@@ -41,8 +41,8 @@ devolvérsela al usuario.
 
     Mathematically, the Levenshtein distance between two strings a, b (of length |a| and |b| respectively) is given by leva,b(a|,|b|) where:
 ![](Levenshtein.webp)
-    where 1(ai≠bi) is the indicator function equal to 0 when ai≠bi and equal to 1 otherwise, and leva, b(i,j) is the distancebetween the first i characters of a and the first j characters of b.
-    Note that the first element in the minimum corresponds to deletion (from a to b), the second to insertion and the third tomatch or mismatch, depending on whether the respective symbols are the same.
+        where 1(ai≠bi) is the indicator function equal to 0 when ai≠bi and equal to 1 otherwise, and leva, b(i,j) is the distancebetween the first i characters of a and the first j characters of b.
+        Note that the first element in the minimum corresponds to deletion (from a to b), the second to insertion and the third tomatch or mismatch, depending on whether the respective symbols are the same.
 
 - Por último se analiza en los documentos devueltos la ubicación de las palabras del query y se añaden al snippet dando una breve información del contenido de los mismos.
 
