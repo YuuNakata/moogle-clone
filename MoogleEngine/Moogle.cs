@@ -25,63 +25,32 @@ public static class Moogle
     }
     public static SearchResult SetItems(string[] compared , FileContent[] file_content,string query)
     {
-
-        //Provicional debido a que el score en el SearchItem no sirve de mucho :)
-        Random rand = new Random();
-        //Las variables uzadas
-        bool empty=true;
+        //Las variables usadas
         int items_size=0;
         //Revisamos que no exista ninguna coincidencia vacia
+
         for (int i = 0; i < compared.Length; i++)
         {
             if(compared[i] !="" && compared[i] !=null)
             {
                 items_size++;
-                empty=false;
             }
 
         }
-        //Declaramos el string con el tamaño correspondiente sin elementos vacios
+
+        //Declaramos el string con el tamaño correspondiente sin elementos vacíos
         SearchItem[] items = new SearchItem [items_size];
-        //Le asignamos cada SearchItem con sus respectivos argumentos
-        for (int i = 0; i < items.Length; i++)
-        {
-            if(compared[i] !="" && compared[i] !=null)
-            {
-                string snippet = S_Reader("../Content/"+compared[i]);
-                string[] s_query = query.ToLower().Split(" ");
-                string[] s_snippet = snippet.ToLower().Split("\n");
-                string final_snippet=string.Empty;
-                for (int j = 0; j < s_query.Length; j++)
-                {
-                    for (int k = 0; k < (int)(s_snippet.Length*0.1f); k++)
-                    {
-                        int random = rand.Next(0,s_snippet.Length);
-                        if(s_snippet[random].Contains(" "+s_query[j]+" "))
-                        {
-                            final_snippet+="..."+s_snippet[random]+"..."+"\n";
-                        }
-                    }
-                }
-                if(final_snippet!=string.Empty)
-                {
-                    items[i] = new SearchItem(compared[i],final_snippet,rand.NextSingle());
-                    empty=false;
-                }
-                else
-                {
-                    items[i] = new SearchItem("Deleted","",0.0f);
-                }
-            }
-            
-        }
+
+        //Le asignamos cada SearchItem con sus respectivos snippet
+        items=Snippet(items,compared,query);
+
         items=items.Where(element => element.Title != "Deleted").ToArray();
         //Si no es vacio se regresan los items obtenidos
-        if(!empty)
-            return new SearchResult(items,TestSuggestion(query,file_content));
-        empty=true;       
+    
+        if(items.Length>=1)
+            return new SearchResult(items,TestSuggestion(query,file_content));     
         //De lo contrario se informa
-        return new SearchResult(new SearchItem[1]{new SearchItem("No se encontro ninguna coincidencia" , "" ,rand.NextSingle())},TestSuggestion(query,file_content));    
+        return new SearchResult(new SearchItem[1]{new SearchItem("No se encontro ninguna coincidencia" , "" ,0)},TestSuggestion(query,file_content));    
     }
 
     private static (string[] compared,FileContent[] file_content) SortItems(SearchQuery search_query)
@@ -101,7 +70,7 @@ public static class Moogle
         }
         file_content = S_Operator(file_content , search_query.Query);
         file_content = Clean_File(file_content);
-        DocumentScore[] ds = Vectorizar(file_content,query);
+        DocumentScore[] ds = Vectorize(file_content,query);
         //Guardamos el score de cada coincidencia
 
         //Ahora lo hacemos coincidir con su respectivo archivo
@@ -132,6 +101,63 @@ public static class Moogle
         //Regresamos el array ya ordenado con las coincidencias
         return (compared,file_content);
 
+    }
+    public static SearchItem[] Snippet(SearchItem[] items,string[] compared,string query)
+    {
+        for (int i = 0; i < items.Length; i++)
+        {
+                string snippet = S_Reader("../Content/"+compared[i]);
+                string[] s_query = query.ToLower().Split(" ");
+                string[] s_snippet = snippet.ToLower().Split(" ");
+                string[] s_snippet_backup = snippet.Split(" ");
+                string final_snippet=string.Empty;
+
+                float length_param =0.01f;              //Parametro para la longitud mostrada en cada parte el snippet separada por ...
+
+                for (int j = 0; j < s_query.Length; j++)
+                {
+                    for (int k = 0; k < s_snippet.Length; k++)
+                    {
+
+                        if(s_snippet[k]==s_query[j])
+                        {
+                            System.Console.WriteLine("lelgue");
+                            int startIndex = k-(int)(length_param*s_snippet.Length);
+                            int length = k+(int)(length_param*s_snippet.Length);
+                            string temp_final_snippet=string.Empty;
+                            if(startIndex<0)
+                                startIndex=0;
+                        
+                            if(length>s_snippet.Length)
+                                length=s_snippet.Length;
+                            for (int l = startIndex; l < length; l++)
+                            {
+                                temp_final_snippet+=$" {s_snippet_backup[l]} ";
+                            }
+                            final_snippet+=$"...{temp_final_snippet}...";
+                        
+                                
+                        }
+
+
+                        // int random = rand.Next(0,s_snippet.Length);
+                        // if(s_snippet[random].Contains(" "+s_query[j]+" "))
+                        // {
+                        //     final_snippet+="..."+s_snippet[random]+"..."+"\n";
+                        // }
+                    }
+                }
+                if(!String.IsNullOrEmpty(final_snippet))
+                {
+                    items[i] = new SearchItem(compared[i],final_snippet,0);
+                }
+                else
+                {
+                    items[i] = new SearchItem("Deleted","",0.0f);
+                }
+            }
+        return items;    
+            
     }
     
     public static string Split_Query(string s_query)
@@ -308,28 +334,34 @@ public static class Moogle
     public static string S_Reader(string file)
     {
         string content="";
-        StreamReader reader = new StreamReader(file);
-        
-        while(!reader.EndOfStream)
+
+        try
         {
-            content += "\n" + reader.ReadLine(); 
+        using (StreamReader lector = new StreamReader(file))
+        {
+            while (lector.Peek() > -1)
+            {
+                string linea = lector.ReadLine();
+                if (!String.IsNullOrEmpty(linea))
+                {
+                    content += Environment.NewLine + linea; 
+                }
+            }
         }
-        reader.Close();
-        
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine("Error: " + ex.Message);
+        }
+
         return content;
     }
 
-    public static float TF(FileContent doc , string word)
+    public static float TF(string[] doc_words , string word)
     {
-        float result=0.0f;
-        string[] doc_words = doc.Content;
-        for (int i = 0; i < doc_words.Length ; i++)
-        {
-            if(word==doc_words[i])
-                result+=1;
-        }
+        float result = doc_words.Where(doc_word=>doc_word==word).ToArray().Length;
         if(result>0)
-            result=1+(float)Math.Log(result);
+            result=1+(float)Math.Log(result); 
         return result;
 
     }
@@ -358,50 +390,60 @@ public static class Moogle
         return false;
     }
 
-    public static DocumentScore[] Vectorizar(FileContent[] docs ,string query)
+    public static DocumentScore[] Vectorize(FileContent[] docs ,string query)
     {
         int word_length=0;
+
         for (int i = 0; i < docs.Length; i++)
         {
             word_length+=docs[i].Content.Length;
         }
         //Guardar las palabras en un array
+
         string[] words = new string[word_length];
+
         int count=0;
+
         for (int i = 0; i < docs.Length; i++)
         {
             string[] temp_content = docs[i].Content;
             for (int j = 0; j < temp_content.Length; j++)
             {
-                if(temp_content[j]!="la" || temp_content[j]!="de" || temp_content[j]!="del")
-                    words[count++]=temp_content[j].ToLower();
+                words[count++]=temp_content[j].ToLower();
             }
         }
+
         //Indexado los TF-IDF como vectores --(implementacion en cambios de mejora)
         
         Vector[] vectores = new Vector[word_length];
+
         for (int i = 0; i < word_length; i++)
         {
             float[] temp_vector = new float[docs.Length];
+            float temp_IDF=IDF(docs,words[i]);
             for (int j = 0; j < docs.Length; j++)
             {
-                temp_vector[j]=TF(docs[j],words[i])*IDF(docs,words[i]);
+                temp_vector[j]=TF(docs[j].Content,words[i])*temp_IDF;
             }
             vectores[i]=new Vector(temp_vector,words[i]);
         }
         string[] s_query =  query.Split(" ");
+
         Vector[] v_query = new Vector[s_query.Length];
+
         for (int i = 0; i < s_query.Length; i++)
         {
             float[] v_float=new float[docs.Length];
+            float temp_IDF=IDF(docs,s_query[i]);
             for (int j = 0; j < docs.Length; j++)
             {
-                System.Console.WriteLine("TF-IDF en proceso...");
-                v_float[j]=TF(docs[j],s_query[i])*IDF(docs,s_query[i]);
+                v_float[j]=TF(docs[j].Content,s_query[i])*temp_IDF;
             }
             v_query[i]=new Vector(v_float,s_query[i]);
         }
+
         DocumentScore[] ds = Scorize(vectores,docs,v_query);
+
         return ds;
     }
     public static DocumentScore[] Scorize(Vector[] vectores,FileContent[] files , Vector[] query)
@@ -446,16 +488,15 @@ public static class Moogle
         return ds;
     }
     
-    #endregion
 
-    #region Tests
+
 
     public static int LevenshteinDistance(string s, string t)
     {
         int n = s.Length;
         int m = t.Length;
         int[,] d = new int[n + 1, m + 1];
-        // Step 1
+        // Paso 1
         if (n == 0)
         {
             return m;
@@ -464,32 +505,33 @@ public static class Moogle
         {
             return n;
         }
-        // Step 2
+        // Paso 2
         for (int i = 0; i <= n; d[i, 0] = i++)
         {
         }
         for (int j = 0; j <= m; d[0, j] = j++)
         {
         }
-        // Step 3
+        // Paso 3
         for (int i = 1; i <= n; i++)
         {
-            //Step 4
+            //Paso 4
             for (int j = 1; j <= m; j++)
             {
-                // Step 5
+                // Paso 5
                 int cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
-                // Step 6
+                // Paso 6
                 d[i, j] = Math.Min(
                     Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
                     d[i - 1, j - 1] + cost);
             }
         }
-        // Step 7
+        // Paso 7
         return d[n, m];
     }
         public static string TestSuggestion(string query,FileContent[] file_content)
         {
+            //Metodo para devolver la sugerencia en caso de no encontrar nada
             string[] s_query=query.Split(" ");
             bool[] b_query = new bool[s_query.Length];
             string result="";
@@ -502,6 +544,7 @@ public static class Moogle
                 }
             }
             int global_cost = int.MaxValue;
+            
             for (int i = 0; i < b_query.Length; i++)
             {
                 if(!b_query[i] && s_query[i].Length!=0)
@@ -512,18 +555,29 @@ public static class Moogle
                        string[] temp_content = file_content[j].Content;
                        for (int k = 0; k < temp_content.Length; k++)
                        {
-                           int temp_cost=LevenshteinDistance(s_query[i],temp_content[k]);
-                           if(temp_cost<global_cost && temp_cost<=3)
+                           int temp_cost=LevenshteinDistance(s_query[i],temp_content[k]); //Calcula la distancia d Levenshtein y de cada palabra del query para cada una de los documentos
+
+                           if(temp_cost<global_cost && temp_cost<=3) // Si la cantidad de cambios necesaria es 3 o menos se cambia la palabra y se guarda la anterior para la siguiente iteración
                            {
                                 global_cost=temp_cost;
-                                query=query.Replace(last_word,temp_content[k]);
-                                last_word=temp_content[k];
+                                if(last_word.Length>0){
+                                    query=query.Replace(last_word,temp_content[k]);
+                                    last_word=temp_content[k];
+                                }
+
+                           }
+                           else //En el caso que la cantidad de cambios sea mayor que 3 entonces se elimina esa palabra del string
+                           {
+                                global_cost=temp_cost;
+                                if(last_word.Length>0){
+                                    query=query.Replace(last_word,"");
+                                    last_word=temp_content[k];
+                                }
+       
                            }
                        }
                     }
                     result=query;
-
-
                 }
 
             }
