@@ -172,7 +172,15 @@ public static class Moogle
                 for (int k = 0; k < temp_query[j].Length; k++)
                 {
     
-                if(temp_query[j][k] == '!' || temp_query[j][k] == '^' || temp_query[j][k] == '~' || temp_query[j][k] == ',' || temp_query[j][k] == '.' || temp_query[j][k] == '?' || temp_query[j][k] == '*')
+                if(temp_query[j][k] == '!' || temp_query[j][k] == '^' )
+                {
+                    break;
+                }
+                if(temp_query[j][k] == '^' )
+                {
+                    return temp_query[j];
+                }
+                if( temp_query[j][k] == '^' || temp_query[j][k] == '~' || temp_query[j][k] == ',' || temp_query[j][k] == '.' || temp_query[j][k] == '?' || temp_query[j][k] == '*')
                 {
                     continue;
                 }
