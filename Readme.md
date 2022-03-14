@@ -39,12 +39,13 @@ devolvérsela al usuario.
 ##### Distancia de Levenshtein
 
 > La distancia de Levenshtein entre dos cadenas a, b es la cantidad mínima de cambios elementales en la cadena "a" para que se convierta en la "b" donde los cambios pueden ser una inserción, eliminación o la sustitución de un carácter
-![](Levenshtein.png)
-> Por ejemplo:
 
-    -"pelo" y "perro" (inserción de "r" entre "l" y "o" y sustitución de "l" por "r")
-    -"casa" y "caza" (sustitución de "s" por "z")
-    -"manta" y "matar" (eliminación de "n" e inserción de "r")
+![](Levenshtein.png)
+
+> Por ejemplo:
+-"pelo" y "perro" (inserción de "r" entre "l" y "o" y sustitución de "l" por "r")
+-"casa" y "caza" (sustitución de "s" por "z")
+-"manta" y "matar" (eliminación de "n" e inserción de "r")
 
 
 - Por último se analiza en los documentos devueltos la ubicación de las palabras del query y se añaden al snippet dando una breve información del contenido de los mismos.
