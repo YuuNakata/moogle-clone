@@ -127,7 +127,6 @@ public static class Moogle
 
                         if(s_snippet[k]==s_query[j])
                         {
-                            System.Console.WriteLine("lelgue");
                             int startIndex = k-(int)(length_param*s_snippet.Length);
                             int length = k+(int)(length_param*s_snippet.Length);
                             string temp_final_snippet=string.Empty;
