@@ -23,12 +23,12 @@ operacion para el query y se crean vectores de esta misma forma para cada una de
 
 - Seguido de esto pasa a otro metodo el cual se encarga de tomando los vectores antes formados calcular la similitud entre ellos y el query mediante el cálculo del coseno entre cada unos de esos vectores y el véctor query, para luego asignarle ese valor de similitud a cada uno de sus documentos y devolverlos.
 
-#### A continuación dejo una explicación de este algoritmo extraída de [Information retrieval document search using vector space model](https://www.datasciencecentral.com/information-retrieval-document-search-using-vector-space-model-in/)
-##### Similarity Measures: cosine similarity
+##### Simulitud del coseno:
 
-   > Mathematically, closeness between two vectors is calculated by calculating the cosine angle between two vectors. In similarlines, we can calculate cosine angle between each document vector and the query vector to find its closeness. To findrelevant document to the query term , we may calculate the similarity score between each document vector and the query termvector by applying cosine similarity . Finally, whichever documents having high similarity scores will be considered asrelevant documents to the query term.
-    When we plot the term document matrix, each document vector represents a point in the vector space. In the below examplequery, Document 1 and Document 2 represent 3 points in the vector space. We can now compare the query with each of thedocument by calculating the cosine angle between them. 
+> Matemáticamente, la cercanía entre dos vectores se obtiene calculando el ángulo del coseno entre dos vectores. De manera similar, se puede calcular el ángulo del coseno entre cada vector de documento y el vector de consulta para encontrar su cercanía. Para encontrar el documento relevante para el término de consulta, podemos calcular la puntuación de similitud entre cada vector de documento y el vector de término de consulta aplicando la similitud del coseno. Finalmente, aquellos documentos que tengan puntajes de similitud altos se considerarán documentos relevantes para el término de consulta.
+>Cuando graficamos el término matriz de documento, cada vector de documento representa un punto en el espacio vectorial. En la siguiente consulta de ejemplo, el Documento 1 y el Documento 2 representan 3 puntos en el espacio vectorial. Ahora podemos comparar la consulta con cada uno de los documentos calculando el ángulo del coseno entre ellos. 
 
+#### A continuación dejo una explicación más extensa de este algoritmo [Information retrieval document search using vector space model](https://www.datasciencecentral.com/information-retrieval-document-search-using-vector-space-model-in/)
 
 - Despúes se guardan todos estos valores en un array , se ordena y luego se iguala con cada uno de los valores para devolverlos en otro array ya ordenados.
 
@@ -36,15 +36,20 @@ operacion para el query y se crean vectores de esta misma forma para cada una de
 número minimo de operaciones necesarias para transformar un string o cadena de caracteres en otro para calcular las palabras mas próximas en los documentos y 
 devolvérsela al usuario.
 
-#### A continuación dejo una explicación de este algoritmo extraída de [The Levenshtein Algorithm](https://www.cuelogic.com/blog/the-levenshtein-algorithm)
+##### Distancia de Levenshtein
 
-> Mathematically, the Levenshtein distance between two strings a, b (of length |a| and |b| respectively) is given by leva,b(a|,|b|) where:
+> La distancia de Levenshtein entre dos cadenas a, b es la cantidad mínima de cambios elementales en la cadena "a" para que se convierta en la "b" donde los cambios pueden ser una inserción, eliminación o la sustitución de un carácter
 ![](Levenshtein.webp)
-> where 1(ai≠bi) is the indicator function equal to 0 when ai≠bi and equal to 1 otherwise, and leva, b(i,j) is thedistancebetween the first i characters of a and the first j characters of b.
-Note that the first element in the minimum corresponds to deletion (from a to b), the second to insertion and the thirdtomatch or mismatch, depending on whether the respective symbols are the same.
+> Por ejemplo:
+    -"pelo" y "perro" (inserción de "r" entre "l" y "o" y sustitución de "l" por "r")
+    -"casa" y "caza" (sustitución de "s" por "z")
+    -"manta" y "matar" (eliminación de "n" e inserción de "r")
+
 
 - Por último se analiza en los documentos devueltos la ubicación de las palabras del query y se añaden al snippet dando una breve información del contenido de los mismos.
 
+#### A continuación dejo una explicación mas extensa de este algoritmo [The Levenshtein Algorithm](https://www.cuelogic.com/blog/the-levenshtein-algorithm)
 
 **Bibliografía empleada**
+
 - Información de wikipedia y varios sitios web.
