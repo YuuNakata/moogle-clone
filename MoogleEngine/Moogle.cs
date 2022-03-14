@@ -48,7 +48,13 @@ public static class Moogle
         //Si no es vacio se regresan los items obtenidos
     
         if(items.Length>=1)
-            return new SearchResult(items,TestSuggestion(query,file_content));     
+        {
+            string suggestion = TestSuggestion(query,file_content);
+            if(query==suggestion)
+                return new SearchResult(items,string.Empty);     
+            else    
+                return new SearchResult(items,suggestion);     
+        }
         //De lo contrario se informa
         return new SearchResult(new SearchItem[1]{new SearchItem("No se encontro ninguna coincidencia" , "" ,0)},TestSuggestion(query,file_content));    
     }
@@ -140,11 +146,6 @@ public static class Moogle
                         }
 
 
-                        // int random = rand.Next(0,s_snippet.Length);
-                        // if(s_snippet[random].Contains(" "+s_query[j]+" "))
-                        // {
-                        //     final_snippet+="..."+s_snippet[random]+"..."+"\n";
-                        // }
                     }
                 }
                 if(!String.IsNullOrEmpty(final_snippet))
@@ -543,10 +544,11 @@ public static class Moogle
                         b_query[i]=true;
                 }
             }
-            int global_cost = int.MaxValue;
             
             for (int i = 0; i < b_query.Length; i++)
             {
+                int global_cost = int.MaxValue;
+
                 if(!b_query[i] && s_query[i].Length!=0)
                 {
                     string last_word=s_query[i];
@@ -566,17 +568,10 @@ public static class Moogle
                                 }
 
                            }
-                           else //En el caso que la cantidad de cambios sea mayor que 3 entonces se elimina esa palabra del string
-                           {
-                                global_cost=temp_cost;
-                                if(last_word.Length>0){
-                                    query=query.Replace(last_word,"");
-                                    last_word=temp_content[k];
-                                }
-       
-                           }
+
                        }
                     }
+                    global_cost = int.MaxValue;
                     result=query;
                 }
 
