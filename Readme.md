@@ -42,10 +42,10 @@ devolvérsela al usuario.
 
 ![](Levenshtein.png)
 
-> Por ejemplo:
->-"pelo" y "perro" (inserción de "r" entre "l" y "o" y sustitución de "l" por "r")
->-"casa" y "caza" (sustitución de "s" por "z")
->-"manta" y "matar" (eliminación de "n" e inserción de "r")
+> Por ejemplo:  
+>-"pelo" y "perro" (inserción de "r" entre "l" y "o" y sustitución de "l" por "r")  
+>-"casa" y "caza" (sustitución de "s" por "z")  
+>-"manta" y "matar" (eliminación de "n" e inserción de "r")  
 
 
 - Por último se analiza en los documentos devueltos la ubicación de las palabras del query y se añaden al snippet dando una breve información del contenido de los mismos.
