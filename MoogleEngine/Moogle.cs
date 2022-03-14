@@ -65,7 +65,7 @@ public static class Moogle
         string[] files_raw=search_query.FilesRaw;
         string[] files = search_query.Files;
         //Formateamos la query de operadores y signos de puntuacion
-        string query = Split_Query(search_query.Query);
+        string query = Split_Query(search_query.Query).ToLower();
 
         //Leemos los ficheros y los guardamos en un array de FileContent
         FileContent[] file_content = new FileContent[files.Length];
@@ -532,7 +532,7 @@ public static class Moogle
         public static string TestSuggestion(string query,FileContent[] file_content)
         {
             //Metodo para devolver la sugerencia en caso de no encontrar nada
-            string[] s_query=query.Split(" ");
+            string[] s_query=query.ToLower().Split(" ");
             bool[] b_query = new bool[s_query.Length];
             string result="";
             for (int i = 0; i < s_query.Length; i++)

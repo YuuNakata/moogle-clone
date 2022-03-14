@@ -6,7 +6,7 @@ public class FileContent
     public FileContent(string file_name , string content , float ini_score = 0.0f)
     {
         this.FileName=file_name;
-        this.Content=content.Split(" ");
+        this.Content=content.ToLower().Split(" ");
         this.Initial_Score=ini_score;
         
     }
