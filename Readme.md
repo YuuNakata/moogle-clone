@@ -12,10 +12,10 @@ En este proyecto he implementado algunos de los objetivos propuestos,agregando n
 - Agregada una clase para guardar y ordenar la query junto con la dirección de los documentos sobre los cuales se realizará la busqueda(SearchQuery).
 
 - Implementados los operadores (!,^,~,*)
- - !-Indica que esa palabra no puede estar en ninguno de los documentos devueltos.
- - ^-Indica que esa palabra debe estar en todos de los documentos devueltos.
- - ~-Aumenta el score inicial de los documentos donde las palabras a los extremos de este operador se encuentren mas cerca.
- - *-Le otorga mas relevancia a esa palabra en específico.
+ - - !-Indica que esa palabra no puede estar en ninguno de los documentos devueltos.
+ - - ^-Indica que esa palabra debe estar en todos de los documentos devueltos.
+ - - ~-Aumenta el score inicial de los documentos donde las palabras a los extremos de este operador se encuentren mas cerca.
+ - - *-Le otorga mas relevancia a esa palabra en específico.
 
 - Mediante otra clase FileContent se guarda el nombre del archivo con su contenido ya formateado junto a los operadores y ejecutar sus propósitos sobre la clase de archivos antes mencionada,afectando si el documento tiene o no que estar , tanco como su score a tener en cuenta a la hora de ordenar.
 
